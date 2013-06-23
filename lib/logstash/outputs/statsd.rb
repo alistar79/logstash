@@ -51,6 +51,9 @@ class LogStash::Outputs::Statsd < LogStash::Outputs::Base
 
   # A count metric. metric_name => count as hash
   config :count, :validate => :hash, :default => {}
+  
+  # A gauge metric. metric_name => gauge as hash
+  config :gauge, :validate => :hash, :default => {}
 
   # The sample rate for the metric
   config :sample_rate, :validate => :number, :default => 1
@@ -84,6 +87,10 @@ class LogStash::Outputs::Statsd < LogStash::Outputs::Base
     end
     @count.each do |metric, val|
       @client.count(build_stat(event.sprintf(metric), sender),
+                    event.sprintf(val).to_f, @sample_rate)
+    end
+    @gauge.each do |metric, val|
+      @client.gauge(build_stat(event.sprintf(metric), sender),
                     event.sprintf(val).to_f, @sample_rate)
     end
     @timing.each do |metric, val|
